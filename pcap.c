@@ -26,7 +26,12 @@ void pcap_close_session(pcap_capture_session_t *sess)
     efree(sess->filter);
   }
 
+  sess->pcap = NULL;
+  sess->dev = NULL;
+  sess->filter = NULL;
+
   efree(sess);
+  sess = NULL;
 }
 
 pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
@@ -163,7 +168,7 @@ static ssize_t php_pcap_stream_write(php_stream *stream, const char *buf, size_t
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   ssize_t writestate = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return -1;
   }
 
@@ -181,7 +186,7 @@ static ssize_t php_pcap_stream_read(php_stream *stream, char *buf, size_t count)
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   ssize_t readstate = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return -1;
   }
 
@@ -254,7 +259,7 @@ static int php_pcap_stream_cast(php_stream *stream, int castas, void **ret)
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   int fd = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return FAILURE;
   }
 

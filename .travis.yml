@@ -17,4 +17,4 @@ before_script:
   - phpize && ./configure && make
 
 # Run PHPs run-tests.php
-script: TEST_PHP_ARGS="-q --show-out" make test
+script: sudo TEST_PHP_ARGS="-q --show-out" make test
