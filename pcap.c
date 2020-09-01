@@ -12,10 +12,16 @@
 #include "ext/standard/url.h"
 #include "php_pcap.h"
 #include <Zend/zend_interfaces.h>
+#include <sys/socket.h>
+#include <netinet/ip.h>
 #include <pcap.h>
 
 void pcap_close_session(pcap_capture_session_t *sess)
 {
+  if (!sess) {
+    return;
+  }
+
   if (sess->pcap) {
     pcap_close(sess->pcap);
   }
@@ -26,7 +32,12 @@ void pcap_close_session(pcap_capture_session_t *sess)
     efree(sess->filter);
   }
 
+  sess->pcap = NULL;
+  sess->dev = NULL;
+  sess->filter = NULL;
+
   efree(sess);
+  sess = NULL;
 }
 
 pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
@@ -89,46 +100,26 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
 
   if (pcap_set_snaplen(sess->pcap, sess->snaplen) < 0) {
     php_error_docref(NULL, E_WARNING, "Cannot set snapshot length %d on device %s", sess->snaplen, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
-  if (pcap_set_promisc(sess->pcap, sess->promisc) < 0) {
+  if (sess->promisc && (pcap_set_promisc(sess->pcap, sess->promisc) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set promiscuous mode %d on device %s", sess->promisc, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
-  if (pcap_set_immediate_mode(sess->pcap, sess->immediate) < 0) {
+  if (sess->immediate && (pcap_set_immediate_mode(sess->pcap, sess->immediate) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set immediate mode %d on device %s", sess->immediate, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (pcap_set_timeout(sess->pcap, sess->timeout) < 0) {
     php_error_docref(NULL, E_WARNING, "Cannot set timeout %ldms on device %s", sess->timeout, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
-  if (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0) {
-    php_error_docref(NULL, E_WARNING, "Cannot set blocking options on device %s: %s", sess->dev, sess->errbuf);
-
-    pcap_close_session(sess);
-
-    return NULL;
+  if (sess->non_blocking && (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0)) {
+    php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, pcap_geterr(sess->pcap));
   }
 
   if (pcap_activate(sess->pcap) < 0) {
-    php_error_docref(NULL, E_WARNING, "Cannot activate live capture on device %s", sess->dev);
+    php_error_docref(NULL, E_WARNING, "Cannot activate live capture on device %s: %s", sess->dev, pcap_geterr(sess->pcap));
 
     pcap_close_session(sess);
 
@@ -140,18 +131,10 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
 
     if (pcap_compile(sess->pcap, &fp, sess->filter, 0, PCAP_NETMASK_UNKNOWN) < 0) {
       php_error_docref(NULL, E_WARNING, "Cannot parse filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
-
-      pcap_close_session(sess);
-
-      return NULL;
-    }
-
-    if (pcap_setfilter(sess->pcap, &fp) < 0) {
-      php_error_docref(NULL, E_WARNING, "Cannot install filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
-
-      pcap_close_session(sess);
-
-      return NULL;
+    } else {
+      if (pcap_setfilter(sess->pcap, &fp) < 0) {
+        php_error_docref(NULL, E_WARNING, "Cannot install filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
+      }
     }
   }
 
@@ -163,7 +146,7 @@ static ssize_t php_pcap_stream_write(php_stream *stream, const char *buf, size_t
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   ssize_t writestate = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return -1;
   }
 
@@ -181,7 +164,7 @@ static ssize_t php_pcap_stream_read(php_stream *stream, char *buf, size_t count)
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   ssize_t readstate = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return -1;
   }
 
@@ -244,7 +227,9 @@ static int php_pcap_stream_close(php_stream *stream, int close_handle)
 {
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
 
-  pcap_close_session(sess);
+  if (sess) {
+    pcap_close_session(sess);
+  }
 
   return 0;
 }
@@ -254,7 +239,7 @@ static int php_pcap_stream_cast(php_stream *stream, int castas, void **ret)
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   int fd = 0;
 
-  if (!sess->pcap && !pcap_activate_session(sess)) {
+  if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
     return FAILURE;
   }
 
@@ -283,10 +268,14 @@ static int php_pcap_stream_set_option(php_stream *stream, int option, int value,
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   int ret = -1;
 
+  if(!sess || !sess->pcap) {
+    return -1;
+  }
+
   switch (option) {
     case PHP_STREAM_OPTION_BLOCKING:
       if (sess->pcap && pcap_setnonblock(sess->pcap, !value, sess->errbuf) == PCAP_ERROR) {
-        php_error_docref(NULL, E_WARNING, "Cannot set blocking option: %s", sess->errbuf);
+        php_error_docref(NULL, E_WARNING, "Cannot set blocking option: %s", pcap_geterr(sess->pcap));
       } else {
         ret = !sess->non_blocking;
         sess->non_blocking = !value;
@@ -297,7 +286,7 @@ static int php_pcap_stream_set_option(php_stream *stream, int option, int value,
       sess->timeout = ((struct timeval *) ptrparam)->tv_sec * 1000 + (((struct timeval *) ptrparam)->tv_usec / 1000);
 
       if (sess->pcap && (pcap_set_timeout(sess->pcap, sess->timeout) == PCAP_ERROR_ACTIVATED)) {
-        php_error_docref(NULL, E_WARNING, "Cannot set timeout option on active session: %s", sess->errbuf);
+        php_error_docref(NULL, E_WARNING, "Cannot set timeout option on active session: %s", pcap_geterr(sess->pcap));
       } else {
         ret = sess->timeout;
       }
@@ -322,15 +311,18 @@ php_stream_ops php_pcap_stream_ops = {
 /* {{{ php_pcap_fopen
  * pcap:// fopen wrapper
  */
-static php_stream *php_pcap_fopen(
-  php_stream_wrapper *wrapper,
-  const char *path,
-  const char *mode,
-  int options,
-  zend_string **opened_path,
-  php_stream_context *context STREAMS_DC
-)
+static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
+  int raw = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+
+  if (raw < 0) {
+    php_error_docref(NULL, E_WARNING, "Cannot open raw sockets (check privileges or CAP_NET_RAW capability)");
+
+    return NULL;
+  }
+
+  close(raw);
+
   php_url *parsed_url = php_url_parse(path);
   pcap_if_t* alldevsp = NULL;
 

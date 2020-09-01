@@ -4,7 +4,7 @@ RUN apk add $PHPIZE_DEPS && \
   cd /usr/src && \
   tar -xf php.tar.xz && \
   cd php-* && \
-  apk add libpcap libpcap-dev
+  apk add bind-tools libpcap libpcap-dev
 
 COPY . /usr/src/php-pcap-ext
 
