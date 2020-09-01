@@ -4,7 +4,6 @@ addons:
   apt:
     packages:
       - dnsutils
-      - libpcap
       - libpcap-dev
 
 php:
