@@ -16,6 +16,10 @@
 
 void pcap_close_session(pcap_capture_session_t *sess)
 {
+  if (!sess) {
+    return;
+  }
+
   if (sess->pcap) {
     pcap_close(sess->pcap);
   }
@@ -221,7 +225,9 @@ static int php_pcap_stream_close(php_stream *stream, int close_handle)
 {
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
 
-  pcap_close_session(sess);
+  if (sess) {
+    pcap_close_session(sess);
+  }
 
   return 0;
 }
@@ -259,6 +265,10 @@ static int php_pcap_stream_set_option(php_stream *stream, int option, int value,
 {
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
   int ret = -1;
+
+  if(!sess || !sess->pcap) {
+    return -1;
+  }
 
   switch (option) {
     case PHP_STREAM_OPTION_BLOCKING:
