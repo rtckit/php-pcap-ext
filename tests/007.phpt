@@ -15,6 +15,7 @@ $context = stream_context_create([
   'pcap' => [
     'snaplen'   => 2048,
     'immediate' => true,
+    'blocking'  => false,
     'filter'    => 'host ' . $ns,
   ],
 ]);
@@ -25,8 +26,9 @@ var_dump($fp);
 // Trigger capture activation, expect nothing to read
 var_dump(fread($fp, 16));
 
-// Fire the DNS query we want to sniff
-shell_exec("nslookup {$fqdn} ${ns} 2>/dev/null >/dev/null &");
+// Fire the DNS queries we want to sniff
+shell_exec("sleep 0 && dig @{$ns} {$fqdn} A 2>/dev/null >/dev/null &");
+shell_exec("sleep 1 && dig @{$ns} {$fqdn} AAAA 2>/dev/null >/dev/null &");
 
 $captures = [$fp];
 $read = [];
@@ -102,8 +104,8 @@ print "done!";
 resource(%d) of type (stream)
 string(0) ""
 A DNS query for example.com.
-AAAA DNS query for example.com.
 A DNS reply for example.com.: %d.%d.%d.%d TTL=%d
+AAAA DNS query for example.com.
 AAAA DNS reply for example.com.: %x:%x:%x:%x:%x:%x:%x:%x TTL=%d
 string(17) "%x:%x:%x:%x:%x:%x"
 string(17) "%x:%x:%x:%x:%x:%x"

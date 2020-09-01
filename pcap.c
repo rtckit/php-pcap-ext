@@ -125,7 +125,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
   }
 
   if (sess->non_blocking && (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0)) {
-    php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, sess->errbuf);
+    php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, pcap_geterr(sess->pcap));
 
     pcap_close_session(sess);
 
@@ -291,7 +291,7 @@ static int php_pcap_stream_set_option(php_stream *stream, int option, int value,
   switch (option) {
     case PHP_STREAM_OPTION_BLOCKING:
       if (sess->pcap && pcap_setnonblock(sess->pcap, !value, sess->errbuf) == PCAP_ERROR) {
-        php_error_docref(NULL, E_WARNING, "Cannot set blocking option: %s", sess->errbuf);
+        php_error_docref(NULL, E_WARNING, "Cannot set blocking option: %s", pcap_geterr(sess->pcap));
       } else {
         ret = !sess->non_blocking;
         sess->non_blocking = !value;
@@ -302,7 +302,7 @@ static int php_pcap_stream_set_option(php_stream *stream, int option, int value,
       sess->timeout = ((struct timeval *) ptrparam)->tv_sec * 1000 + (((struct timeval *) ptrparam)->tv_usec / 1000);
 
       if (sess->pcap && (pcap_set_timeout(sess->pcap, sess->timeout) == PCAP_ERROR_ACTIVATED)) {
-        php_error_docref(NULL, E_WARNING, "Cannot set timeout option on active session: %s", sess->errbuf);
+        php_error_docref(NULL, E_WARNING, "Cannot set timeout option on active session: %s", pcap_geterr(sess->pcap));
       } else {
         ret = sess->timeout;
       }
