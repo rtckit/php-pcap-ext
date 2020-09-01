@@ -15,7 +15,6 @@ $context = stream_context_create([
   'pcap' => [
     'snaplen'   => 2048,
     'immediate' => true,
-    'blocking'  => false,
     'filter'    => 'host ' . $ns,
   ],
 ]);
