@@ -43,10 +43,12 @@ All I/O operations are no different than any other PHP stream, for example:
 $fp = fopen('pcap://eth0', 'r');
 
 $header = unpack('LtsSec/LtsUsec/LcapLen/Llen', fread($fp, 16)); // pcap packet header, using local machine endianness
-$frame = fread($r, $header['capLen']);
+$frame = fread($fp, $header['capLen']);
 
 // process($frame) ...
 ```
+
+The [tests](https://github.com/rtckit/php-pcap-ext/tree/0.6.0/tests) directory show cases some usage examples.
 
 ## Build
 
