@@ -12,6 +12,7 @@
 #include "ext/standard/url.h"
 #include "php_pcap.h"
 #include <Zend/zend_interfaces.h>
+#include <sys/socket.h>
 #include <pcap.h>
 
 void pcap_close_session(pcap_capture_session_t *sess)
@@ -309,15 +310,18 @@ php_stream_ops php_pcap_stream_ops = {
 /* {{{ php_pcap_fopen
  * pcap:// fopen wrapper
  */
-static php_stream *php_pcap_fopen(
-  php_stream_wrapper *wrapper,
-  const char *path,
-  const char *mode,
-  int options,
-  zend_string **opened_path,
-  php_stream_context *context STREAMS_DC
-)
+static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
+  int raw = socket(AF_INET, SOCK_RAW, IPPROTO_TCP);
+
+  if (raw < 0) {
+    php_error_docref(NULL, E_WARNING, "Cannot open raw sockets (check privileges or CAP_NET_RAW capability)");
+
+    return NULL;
+  }
+
+  close(raw);
+
   php_url *parsed_url = php_url_parse(path);
   pcap_if_t* alldevsp = NULL;
 
