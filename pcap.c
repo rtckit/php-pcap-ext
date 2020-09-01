@@ -128,7 +128,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
   }
 
   if (pcap_activate(sess->pcap) < 0) {
-    php_error_docref(NULL, E_WARNING, "Cannot activate live capture on device %s", sess->dev);
+    php_error_docref(NULL, E_WARNING, "Cannot activate live capture on device %s: %s", sess->dev, pcap_geterr(sess->pcap));
 
     pcap_close_session(sess);
 
