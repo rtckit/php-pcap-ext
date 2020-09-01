@@ -47,7 +47,7 @@ while (($requests < $count) || ($replies < $count)) {
   if (stream_select($read, $write, $except, 0, 100000)) {
     foreach ($read as $r) {
       while ($_header = fread($r, 16)) {
-        $header = unpack('LtsSec/LtsUsec/LcapLen/Llen', $_header); // Account for big endian!
+        $header = unpack('LtsSec/LtsUsec/LcapLen/Llen', $_header);
         $frame = parseLinuxSLLFrame(fread($r, $header['capLen']));
 
         if ($frame['packetType'] === 0) {
