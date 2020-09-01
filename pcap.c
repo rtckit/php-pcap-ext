@@ -120,7 +120,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
   }
 
   if (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0) {
-    php_error_docref(NULL, E_WARNING, "Cannot set blocking options on device %s: %s", sess->dev, sess->errbuf);
+    php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, sess->errbuf);
 
     pcap_close_session(sess);
 
