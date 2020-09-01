@@ -26,5 +26,5 @@ var_dump($fp);
 --EXPECTF--
 Warning: fopen(): Cannot open raw sockets (check privileges or CAP_NET_RAW capability) in %s on line %d
 
-Warning: fopen(pcap://%s): failed to open stream: operation failed in %s on line %d
+Warning: fopen(pcap://%s): %s to open stream: operation failed in %s on line %d
 bool(false)
