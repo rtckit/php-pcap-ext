@@ -94,42 +94,22 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
 
   if (pcap_set_snaplen(sess->pcap, sess->snaplen) < 0) {
     php_error_docref(NULL, E_WARNING, "Cannot set snapshot length %d on device %s", sess->snaplen, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (sess->promisc && (pcap_set_promisc(sess->pcap, sess->promisc) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set promiscuous mode %d on device %s", sess->promisc, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (sess->immediate && (pcap_set_immediate_mode(sess->pcap, sess->immediate) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set immediate mode %d on device %s", sess->immediate, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (pcap_set_timeout(sess->pcap, sess->timeout) < 0) {
     php_error_docref(NULL, E_WARNING, "Cannot set timeout %ldms on device %s", sess->timeout, sess->dev);
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (sess->non_blocking && (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, pcap_geterr(sess->pcap));
-
-    pcap_close_session(sess);
-
-    return NULL;
   }
 
   if (pcap_activate(sess->pcap) < 0) {
@@ -145,18 +125,10 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
 
     if (pcap_compile(sess->pcap, &fp, sess->filter, 0, PCAP_NETMASK_UNKNOWN) < 0) {
       php_error_docref(NULL, E_WARNING, "Cannot parse filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
-
-      pcap_close_session(sess);
-
-      return NULL;
-    }
-
-    if (pcap_setfilter(sess->pcap, &fp) < 0) {
-      php_error_docref(NULL, E_WARNING, "Cannot install filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
-
-      pcap_close_session(sess);
-
-      return NULL;
+    } else {
+      if (pcap_setfilter(sess->pcap, &fp) < 0) {
+        php_error_docref(NULL, E_WARNING, "Cannot install filter '%s' on device %s: %s", sess->filter, sess->dev, pcap_geterr(sess->pcap));
+      }
     }
   }
 
