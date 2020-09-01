@@ -30,7 +30,7 @@ $context = stream_context_create([
     'immediate' => true,  // Sets immediate mode (skips buffering)
     'blocking'  => false, // Enables/disables blocking mode (useful in stream_select loops)
     'timeout'   => 0.100, // I/O timeout, in seconds
-    'filter'    => 'dst port 53', // Filter, reference: https://www.tcpdump.org/manpages/pcap-filter.7.html
+    'filter'    => 'dst port 53', // Reference: https://www.tcpdump.org/manpages/pcap-filter.7.html
   ],
 ]);
 
@@ -45,10 +45,24 @@ $fp = fopen('pcap://eth0', 'r');
 $header = unpack('LtsSec/LtsUsec/LcapLen/Llen', fread($fp, 16)); // pcap packet header, using local machine endianness
 $frame = fread($fp, $header['capLen']);
 
+var_dump($header)
+/*
+array(4) {
+  ["tsSec"]=>
+  int(1598997114)
+  ["tsUsec"]=>
+  int(239648)
+  ["capLen"]=>
+  int(96)
+  ["len"]=>
+  int(96)
+}
+*/
+
 // process($frame) ...
 ```
 
-The [tests](https://github.com/rtckit/php-pcap-ext/tree/0.6.0/tests) directory show cases some usage examples.
+The [tests](https://github.com/rtckit/php-pcap-ext/tree/master/tests) directory show cases some usage examples.
 
 ## Build
 
