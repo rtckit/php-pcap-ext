@@ -1,5 +1,9 @@
 language: php
 
+arch:
+  - amd64
+  - arm64
+
 addons:
   apt:
     packages:
