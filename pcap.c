@@ -13,6 +13,7 @@
 #include "php_pcap.h"
 #include <Zend/zend_interfaces.h>
 #include <sys/socket.h>
+#include <netinet/ip.h>
 #include <pcap.h>
 
 void pcap_close_session(pcap_capture_session_t *sess)
