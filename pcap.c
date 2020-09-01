@@ -95,7 +95,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
     return NULL;
   }
 
-  if (pcap_set_promisc(sess->pcap, sess->promisc) < 0) {
+  if (sess->promisc && (pcap_set_promisc(sess->pcap, sess->promisc) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set promiscuous mode %d on device %s", sess->promisc, sess->dev);
 
     pcap_close_session(sess);
@@ -103,7 +103,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
     return NULL;
   }
 
-  if (pcap_set_immediate_mode(sess->pcap, sess->immediate) < 0) {
+  if (sess->immediate && (pcap_set_immediate_mode(sess->pcap, sess->immediate) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set immediate mode %d on device %s", sess->immediate, sess->dev);
 
     pcap_close_session(sess);
@@ -119,7 +119,7 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
     return NULL;
   }
 
-  if (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0) {
+  if (sess->non_blocking && (pcap_setnonblock(sess->pcap, sess->non_blocking, sess->errbuf) < 0)) {
     php_error_docref(NULL, E_WARNING, "Cannot set blocking option on device %s: %s", sess->dev, sess->errbuf);
 
     pcap_close_session(sess);
