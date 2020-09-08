@@ -38,8 +38,10 @@ $localMac = '';
 $remoteMac = '';
 $ipv4Request = false;
 $ipv4Response = false;
+$ipv4Addr = '';
 $ipv6Request = false;
 $ipv6Response = false;
+$ipv6Addr = '';
 $replies = 0;
 
 $startedAt = time();
@@ -81,9 +83,11 @@ while (!$ipv4Request || !$ipv4Response || !$ipv6Request || !$ipv6Response) {
               } else { // Answer
                 if ($dns['answers'][0]['type'] === 1) { // A
                   $ipv4Response = true;
+                  $ipv4Addr = $dns['answers'][0]['address'];
                   echo "A DNS reply for {$dns['queries'][0]['name']}: {$dns['answers'][0]['address']} TTL={$dns['answers'][0]['ttl']}\n";
                 } elseif ($dns['answers'][0]['type'] === 28) { // AAAA
                   $ipv6Response = true;
+                  $ipv6Addr = $dns['answers'][0]['address'];
                   echo "AAAA DNS reply for {$dns['queries'][0]['name']}: {$dns['answers'][0]['address']} TTL={$dns['answers'][0]['ttl']}\n";
                 }
               }
@@ -94,6 +98,9 @@ while (!$ipv4Request || !$ipv4Response || !$ipv6Request || !$ipv6Response) {
     }
   }
 }
+
+var_dump($ipv4Addr === filter_var($ipv4Addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4));
+var_dump($ipv6Addr === filter_var($ipv6Addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 
 var_dump($localMac);
 var_dump($remoteMac);
@@ -107,6 +114,8 @@ A DNS query for example.com.
 A DNS reply for example.com.: %d.%d.%d.%d TTL=%d
 AAAA DNS query for example.com.
 AAAA DNS reply for example.com.: %x:%x:%x:%x:%x:%x:%x:%x TTL=%d
+bool(true)
+bool(true)
 string(17) "%x:%x:%x:%x:%x:%x"
 string(17) "%x:%x:%x:%x:%x:%x"
 done!

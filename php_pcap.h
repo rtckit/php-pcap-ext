@@ -40,6 +40,7 @@ typedef struct pcap_capture_session {
   long timeout;
   char *filter;
   php_stream_context *context;
+  int fd;
 } pcap_capture_session_t;
 
 #endif	/* PHP_PCAP_H */
