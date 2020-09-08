@@ -247,11 +247,19 @@ static int php_pcap_stream_cast(php_stream *stream, int castas, void **ret)
     case PHP_STREAM_AS_FD_FOR_SELECT:
     case PHP_STREAM_AS_FD:
     case PHP_STREAM_AS_SOCKETD:
+      if (sess->fd && ret) {
+        *(int *) ret = sess->fd;
+
+        return SUCCESS;
+      }
+
       fd = pcap_get_selectable_fd(sess->pcap);
 
       if (fd < 0) {
         return FAILURE;
       }
+
+      sess->fd = fd;
 
       if (ret) {
         *(int *) ret = fd;
@@ -369,6 +377,7 @@ static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path,
   sess->timeout = 1000;
   sess->filter = NULL;
   sess->context = context;
+  sess->fd = 0;
 
   php_url_free(parsed_url);
 
