@@ -38,17 +38,17 @@ bool(false)
 
 Warning: fopen(): Cannot parse pcap URL in %s on line %d
 
-Warning: fopen(pcap://): failed to open stream: operation failed in %s on line %d
+Warning: fopen(pcap://): %s to open stream: operation failed in %s on line %d
 bool(false)
 
 Warning: fopen(): Cannot parse pcap URL in %s on line %d
 
-Warning: fopen(pcap:///): failed to open stream: operation failed in %s on line %d
+Warning: fopen(pcap:///): %s to open stream: operation failed in %s on line %d
 bool(false)
 
 Warning: fopen(): Cannot parse pcap URL in %s on line %d
 
-Warning: fopen(pcap:///path): failed to open stream: operation failed in %s on line %d
+Warning: fopen(pcap:///path): %s to open stream: operation failed in %s on line %d
 bool(false)
 
 Warning: fopen(): Unsupported path: /path in %s on line %d
