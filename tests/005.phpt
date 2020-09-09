@@ -13,6 +13,15 @@ if (!$dev) {
 $fp = fopen('pcap.bogus://' . $dev, 'r');
 var_dump($fp);
 
+$fp = fopen('pcap://', 'r');
+var_dump($fp);
+
+$fp = fopen('pcap:///', 'r');
+var_dump($fp);
+
+$fp = fopen('pcap:///path', 'r');
+var_dump($fp);
+
 $fp = fopen('pcap://' . $dev . '/path', 'r');
 var_dump($fp);
 
@@ -25,6 +34,21 @@ print "done!";
 Warning: fopen(): Unable to find the wrapper "pcap.bogus" - did you forget to enable it when you configured PHP? in %s on line %d
 
 Warning: fopen(pcap.bogus://%s): %s to open stream: No such file or directory in %s on line %d
+bool(false)
+
+Warning: fopen(): Cannot parse pcap URL in %s on line %d
+
+Warning: fopen(pcap://): failed to open stream: operation failed in %s on line %d
+bool(false)
+
+Warning: fopen(): Cannot parse pcap URL in %s on line %d
+
+Warning: fopen(pcap:///): failed to open stream: operation failed in %s on line %d
+bool(false)
+
+Warning: fopen(): Cannot parse pcap URL in %s on line %d
+
+Warning: fopen(pcap:///path): failed to open stream: operation failed in %s on line %d
 bool(false)
 
 Warning: fopen(): Unsupported path: /path in %s on line %d

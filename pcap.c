@@ -332,7 +332,19 @@ static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path,
   close(raw);
 
   php_url *parsed_url = php_url_parse(path);
-  pcap_if_t* alldevsp = NULL;
+
+  if (!parsed_url) {
+    php_error_docref(NULL, E_WARNING, "Cannot parse pcap URL");
+
+    return NULL;
+  }
+
+  if (!parsed_url->host || !strlen(parsed_url->host->val)) {
+    php_error_docref(NULL, E_WARNING, "Missing host, should be device's name");
+    php_url_free(parsed_url);
+
+    return NULL;
+  }
 
   if (!parsed_url->scheme) {
     php_error_docref(NULL, E_WARNING, "Missing scheme, should be 'pcap'");
@@ -380,6 +392,8 @@ static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path,
   sess->fd = 0;
 
   php_url_free(parsed_url);
+
+  pcap_if_t* alldevsp = NULL;
 
   if (pcap_findalldevs(&alldevsp, sess->errbuf)) {
     php_error_docref(NULL, E_WARNING, "Cannot enumerate network devices: %s", sess->errbuf);
