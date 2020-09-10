@@ -2,13 +2,13 @@
 
 Stream driven PHP packet capture extension.
 
-[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.0-green) ![License](https://img.shields.io/badge/license-MIT-blue)
+[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.2-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Usage
 
-The `pcap` extension has been developed against PHP 7.4+ and regularly tested against the upcoming PHP 8.
+The `pcap` extension has been developed against PHP 7.4+ and regularly tested against the nightly PHP 8 build; from an operating system perspective, the ubiquity of Linux makes it the only target. The supported architectures are x86_64 and arm64.
 
-The extension provides bindings for [libpcap](https://github.com/the-tcpdump-group/libpcap) and exposes its functionality via PHP streams; the packet formatting is consistent with the `pcap` file format (learn more [here](https://wiki.wireshark.org/Development/LibpcapFileFormat) and [here](https://formats.kaitai.io/pcap/index.html)). The functionality is deliberately limited to I/O operations, the actual packet parsing/crafting should be performed using pure PHP; such supporting libraries will be open sourced soon.
+The extension provides bindings for [libpcap](https://github.com/the-tcpdump-group/libpcap) and exposes its functionality via PHP streams; the packet formatting is consistent with the `pcap` file format (learn more [here](https://wiki.wireshark.org/Development/LibpcapFileFormat) and [here](https://formats.kaitai.io/pcap/index.html)). The functionality is deliberately limited to I/O operations, the actual packet parsing/crafting should be performed using pure PHP (some relevant supporting libraries to be published soon).
 
 It's also worth familiarizing yourself with [libpcap and tcpdump](https://www.tcpdump.org/index.html).
 
@@ -60,6 +60,9 @@ array(4) {
 */
 
 // process($frame) ...
+
+// Inject raw packets (including the link layer data) by writing to the stream
+$count = fwrite($fp, $packet);
 ```
 
 The [tests](https://github.com/rtckit/php-pcap-ext/tree/master/tests) directory show cases some usage examples.
@@ -76,11 +79,15 @@ make
 
 ## Tests
 
-Before running the test suite, make sure the user has the ability to capture network packets (root or CAP_RAW).
+Before running the test suite, make sure the user has the ability to capture network packets (root or `CAP_NET_RAW`).
 
 ```sh
 make test
 ```
+
+## FFI Alternative
+
+A fully compilable [FFI packet capture](https://github.com/rtckit/php-pcap-ffi) package is also available; the underlying environment would still have the provide the libpcap library as well as the FFI dependencies (libffi and the PHP FFI extension). Otherwise, the FFI package can be used as a drop-in replacement when it makes sense to do so.
 
 ## License
 
@@ -88,7 +95,7 @@ MIT, see [LICENSE file](LICENSE).
 
 ### Acknowledgments
 
-* [libpcap](https://github.com/the-tcpdump-group/libpcap)
+* [libpcap](https://github.com/the-tcpdump-group/libpcap) by The Tcpdump Group, BSD licensed.
 
 ### Contributing
 
