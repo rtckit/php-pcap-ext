@@ -5,6 +5,8 @@ fopen against bogus URLs
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 $dev = current(array_keys(net_get_interfaces()));
 if (!$dev) {
   die('Cannot find any viable network devices');

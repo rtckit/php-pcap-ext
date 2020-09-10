@@ -5,6 +5,8 @@ fwrite/fread ARP to IPv4 gateway
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 require('helpers.php');
 
 $dev = $gw = null;

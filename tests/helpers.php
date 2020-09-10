@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 function parseLinuxSLLFrame(string $body): array {
   $ret = unpack('npacketType/narphrd/naddressLength', $body);
   $ret['address'] = formatEtherAddr(substr($body, 6, $ret['addressLength']));

@@ -5,6 +5,8 @@ stream_get_wrappers pcap
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 var_dump(in_array('pcap', stream_get_wrappers()));
 
 print "done!";
