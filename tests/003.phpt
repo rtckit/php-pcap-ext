@@ -5,6 +5,8 @@ fopen devices from net_get_interfaces
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 $devs = 0;
 
 foreach (array_keys(net_get_interfaces()) as $dev) {

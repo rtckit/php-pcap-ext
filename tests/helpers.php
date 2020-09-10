@@ -1,10 +1,54 @@
 <?php
 
+declare(strict_types = 1);
+
 function parseLinuxSLLFrame(string $body): array {
   $ret = unpack('npacketType/narphrd/naddressLength', $body);
   $ret['address'] = formatEtherAddr(substr($body, 6, $ret['addressLength']));
   $ret['etherType'] = unpack('v', $body, 14)[1];
   $ret['data'] = substr($body, 16);
+
+  return $ret;
+}
+
+function parseEthernet2Frame(string $body): array {
+  $ret = [];
+  $ret['destination'] = formatEtherAddr(substr($body, 0, 6));
+  $ret['source'] = formatEtherAddr(substr($body, 6, 6));
+  $ret['etherType'] = unpack('n', $body, 12)[1];
+  $ret['data'] = substr($body, 14);
+
+  return $ret;
+}
+
+function craftEthernet2Frame(array $frame): string {
+  $ret = encodeEtherAddr($frame['destination']);
+  $ret .= encodeEtherAddr($frame['source']);
+  $ret .= pack('n', $frame['etherType']);
+  $ret .= $frame['data'];
+
+  return $ret;
+}
+
+function parseArpFrame(string $body): array {
+  $ret = unpack('nhtype/nptype/chsize/cpsize/nopcode', $body);
+  $ret['senderEtherAddress'] = formatEtherAddr(substr($body, 8, $ret['hsize']));
+  $ret['targetEtherAddress'] = formatEtherAddr(substr($body, 18, $ret['hsize']));
+
+  if ($ret['ptype'] == 0x0800) {
+    $ret['senderProtoAddress'] = long2ip(unpack('N', $body, 14)[1]);
+    $ret['targetProtoAddress'] = long2ip(unpack('N', $body, 24)[1]);
+  }
+
+  return $ret;
+}
+
+function craftArpFrame(array $frame): string {
+  $ret = pack('nnccn', $frame['htype'], $frame['ptype'], $frame['hsize'], $frame['psize'], $frame['opcode']);
+  $ret .= encodeEtherAddr($frame['senderEtherAddress']);
+  $ret .= pack('N', ip2long($frame['senderProtoAddress']));
+  $ret .= encodeEtherAddr($frame['targetEtherAddress']);
+  $ret .= pack('N', ip2long($frame['targetProtoAddress']));
 
   return $ret;
 }
@@ -139,4 +183,41 @@ function formatEtherAddr(string $bin): string {
   }
 
   return implode(':', $ret);
+}
+
+function encodeEtherAddr(string $addr): string {
+  $ret = '';
+
+  $bytes = explode(':', $addr);
+
+  foreach ($bytes as $byte) {
+    $ret .= chr(hexdec($byte));
+  }
+
+  return $ret;
+}
+
+function getRoutingTable(): ?array {
+  $fp = fopen('/proc/net/route', 'r');
+
+  if (!$fp) {
+    return null;
+  }
+
+  $ret = [];
+
+  $header = preg_split("/[\s]+/", fgets($fp));
+
+  while ($entry = fgets($fp)) {
+    $record = preg_split("/[\s]+/", $entry);
+
+    foreach ($header as $k => $v) {
+      $record[$v] = $record[$k];
+      unset($record[$k]);
+    }
+
+    $ret[] = $record;
+  }
+
+  return $ret;
 }

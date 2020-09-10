@@ -5,6 +5,8 @@ extension_loaded pcap
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 var_dump(extension_loaded('pcap'));
 
 print "done!";

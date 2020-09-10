@@ -5,6 +5,8 @@ fopen against bogus devices
 --FILE--
 <?php
 
+declare(strict_types = 1);
+
 $fp = fopen('pcap://' . uniqid('bogus'), 'r');
 var_dump($fp);
 
