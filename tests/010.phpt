@@ -1,7 +1,10 @@
 --TEST--
 fwrite/fread ARP to IPv4 gateway
 --SKIPIF--
-<?php if (!extension_loaded('pcap')) { echo 'skip'; } ?>
+<?php
+  if (!extension_loaded('pcap')) { echo 'skip'; }
+  if (version_compare(PHP_VERSION, '7.3.0', '<')) { echo 'skip net_get_interfaces() not available'; }
+?>
 --FILE--
 <?php
 
