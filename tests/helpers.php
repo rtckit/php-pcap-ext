@@ -228,7 +228,7 @@ if (!function_exists('net_get_interfaces')) {
 
     if ($handle = opendir('/sys/class/net/')) {
       while (false !== ($entry = readdir($handle))) {
-        if ($entry[0] !== '.') {
+        if (($entry[0] !== '.') && ($entry !== 'bonding_masters')) {
           $ret[$entry] = [];
         }
       }
