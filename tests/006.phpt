@@ -1,7 +1,11 @@
 --TEST--
 fopen without privileges
 --SKIPIF--
-<?php if (!extension_loaded('pcap')) { echo 'skip'; } ?>
+<?php 
+if (!extension_loaded('pcap')) { echo 'skip pcap ext not loaded'; } 
+if (!extension_loaded('posix')) { echo 'skip posix not loaded'; } 
+if (posix_getuid()) { echo 'skip root only'; }
+?>
 --FILE--
 <?php
 
