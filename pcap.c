@@ -141,13 +141,13 @@ pcap_capture_session_t * pcap_activate_session(pcap_capture_session_t *sess)
   return sess;
 }
 
-static ssize_t php_pcap_stream_write(php_stream *stream, const char *buf, size_t count)
+static PCAP_IO_RETURN_TYPE php_pcap_stream_write(php_stream *stream, const char *buf, size_t count)
 {
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
-  ssize_t writestate = 0;
+  PCAP_IO_RETURN_TYPE writestate = 0;
 
   if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
-    return -1;
+    return PCAP_IO_RETURN_ERROR;
   }
 
   writestate = pcap_inject(sess->pcap, buf, count);
@@ -159,13 +159,13 @@ static ssize_t php_pcap_stream_write(php_stream *stream, const char *buf, size_t
   return writestate;
 }
 
-static ssize_t php_pcap_stream_read(php_stream *stream, char *buf, size_t count)
+static PCAP_IO_RETURN_TYPE php_pcap_stream_read(php_stream *stream, char *buf, size_t count)
 {
   pcap_capture_session_t *sess = (pcap_capture_session_t *) stream->abstract;
-  ssize_t readstate = 0;
+  PCAP_IO_RETURN_TYPE readstate = 0;
 
   if (!sess || (!sess->pcap && !pcap_activate_session(sess))) {
-    return -1;
+    return PCAP_IO_RETURN_ERROR;
   }
 
   int ret = 0, remainder = count, offset = 0, length = 0;
@@ -339,7 +339,7 @@ static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path,
     return NULL;
   }
 
-  if (!parsed_url->host || !strlen(parsed_url->host->val)) {
+  if (!parsed_url->host || !strlen(PCAP_URL_PART(parsed_url->host))) {
     php_error_docref(NULL, E_WARNING, "Missing host, should be device's name");
     php_url_free(parsed_url);
 
@@ -353,30 +353,29 @@ static php_stream *php_pcap_fopen(php_stream_wrapper *wrapper, const char *path,
     return NULL;
   }
 
-  if (strcmp(parsed_url->scheme->val, "pcap")) {
-    php_error_docref(NULL, E_WARNING, "Unsupported scheme: %s", parsed_url->scheme->val);
+  if (strcmp(PCAP_URL_PART(parsed_url->scheme), "pcap")) {
+    php_error_docref(NULL, E_WARNING, "Unsupported scheme: %s", PCAP_URL_PART(parsed_url->scheme));
     php_url_free(parsed_url);
 
     return NULL;
   }
 
-  if (parsed_url->path && strcmp(parsed_url->path->val, "/")) {
-    php_error_docref(NULL, E_WARNING, "Unsupported path: %s", parsed_url->path->val);
+  if (parsed_url->path && strcmp(PCAP_URL_PART(parsed_url->path), "/")) {
+    php_error_docref(NULL, E_WARNING, "Unsupported path: %s", PCAP_URL_PART(parsed_url->path));
     php_url_free(parsed_url);
 
     return NULL;
   }
 
   if (parsed_url->query) {
-    php_error_docref(NULL, E_WARNING, "Unsupported query: %s", parsed_url->query->val);
+    php_error_docref(NULL, E_WARNING, "Unsupported query: %s", PCAP_URL_PART(parsed_url->query));
     php_url_free(parsed_url);
 
     return NULL;
   }
 
   pcap_capture_session_t *sess = emalloc(sizeof(pcap_capture_session_t));
-  sess->dev = emalloc(strlen(parsed_url->host->val) + 1);
-  strcpy(sess->dev, parsed_url->host->val);
+  sess->dev = estrdup(PCAP_URL_PART(parsed_url->host));
   sess->snaplen = BUFSIZ;
   sess->promisc = 0;
   sess->pcap = NULL;
