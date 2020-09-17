@@ -2,11 +2,11 @@
 
 Stream driven PHP packet capture extension.
 
-[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.2-green) ![License](https://img.shields.io/badge/license-MIT-blue)
+[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.4-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Usage
 
-The `pcap` extension has been developed against PHP 7.4+ and regularly tested against the nightly PHP 8 build; from an operating system perspective, the ubiquity of Linux makes it the only target. The supported architectures are x86_64 and arm64.
+The `pcap` extension has been developed against PHP 7.1+ and regularly tested against the nightly PHP 8 build; from an operating system perspective, the ubiquity of Linux makes it the only target. The supported architectures are x86_64 and arm64.
 
 The extension provides bindings for [libpcap](https://github.com/the-tcpdump-group/libpcap) and exposes its functionality via PHP streams; the packet formatting is consistent with the `pcap` file format (learn more [here](https://wiki.wireshark.org/Development/LibpcapFileFormat) and [here](https://formats.kaitai.io/pcap/index.html)). The functionality is deliberately limited to I/O operations, the actual packet parsing/crafting should be performed using pure PHP (some relevant supporting libraries to be published soon).
 
