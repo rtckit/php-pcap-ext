@@ -50,6 +50,7 @@ if test "$PHP_PCAP" != "no"; then
     ])
   fi
 
+  PHP_ADD_MAKEFILE_FRAGMENT
   PHP_SUBST([CFLAGS])
     PHP_SUBST(PCAP_SHARED_LIBADD)
 fi
