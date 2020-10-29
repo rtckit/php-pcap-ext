@@ -4,6 +4,9 @@
  * IPv6 oriented tests
  * Expose useful data pointers via `stream_metadata` (accessible through `stream_get_meta_data`)
 
+### 0.6.5
+ * Aligned version with FFI counterpart
+
 ### 0.6.4
  * Support for older PHP versions (7.1+)
 
