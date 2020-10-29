@@ -2,7 +2,7 @@
 
 Stream driven PHP packet capture extension.
 
-[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.4-green) ![License](https://img.shields.io/badge/license-MIT-blue)
+[![Build Status](https://travis-ci.com/rtckit/php-pcap-ext.svg?branch=master)](https://travis-ci.com/rtckit/php-pcap-ext) ![Version](https://img.shields.io/badge/version-v0.6.5-green) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## Usage
 

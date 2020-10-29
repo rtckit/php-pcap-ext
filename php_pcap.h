@@ -9,7 +9,7 @@
 extern zend_module_entry pcap_module_entry;
 # define phpext_pcap_ptr &pcap_module_entry
 
-# define PHP_PCAP_VERSION "0.6.4"
+# define PHP_PCAP_VERSION "0.6.5"
 
 # if defined(ZTS) && defined(COMPILE_DL_PCAP)
 ZEND_TSRMLS_CACHE_EXTERN()
